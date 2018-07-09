@@ -10,6 +10,12 @@ main {
 	margin: 0 auto;
 }
 
+.fa {
+	position: fixed;
+	left: 2%;
+	bottom: 5%;
+}
+
 #list {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

@@ -30,6 +30,7 @@
 		</div>
 	</header>
 	<main>
+		<p id="message" style="display: none">No articles applicable to your search</p>
 		<ul id="list">
 		</ul>
 	</main>
@@ -54,6 +55,7 @@
 			}
 
 			document.getElementById('list').parentNode.replaceChild(newul, document.getElementById("list"));
+			topFunction();
 			return false;
 		}
 		function selectTag(id) {
@@ -169,6 +171,13 @@
 				newul.appendChild(newlist[i]);
 			}
 
+			if (newlist.length == 0) {
+				document.getElementById('message').style.display = '';
+				
+			} else {
+				document.getElementById('message').style.display = 'none';
+			}
+
 			document.getElementById('list').parentNode.replaceChild(newul, document.getElementById("list"));
 		}
 
@@ -278,6 +287,11 @@
 				document.getElementById("cbx").checked = JSON.parse(localStorage.getItem("sort"));
 				
 			}
+		}
+
+		function topFunction() {
+		    document.body.scrollTop = 0; // For Safari
+		    document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
 		}
 	</script>
 </body>
