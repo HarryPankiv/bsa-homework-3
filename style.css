@@ -87,6 +87,14 @@ main {
 
 button {
 	background-color: #009688;
+	outline: 0;
+	border: none;
+	border-radius: 2px;
+	text-transform: uppercase;
+	height: 36px;
+	padding: 0 16px;
+	margin: 0 20px;
+	color: white;
 }
 
 #list span {
@@ -100,6 +108,7 @@ button {
 }
 
 .second-row {
+	margin-top: 20px;
 	display: flex;
 	justify-content: center;
 }
