@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>DOM</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<link href="https://fonts.googleapis.com/css?family=Song+Myung" rel="stylesheet">
+</head>
+<body>
+	<header>
+		<div class="row">
+			<span id="politics" class="tag" onclick="selectTag(id);">#politics</span>
+			<span id="sport" class="tag" onclick="selectTag(id);">#sport</span>
+			<span id="food" class="tag" onclick="selectTag(id);">#food</span>
+			<span id="tech" class="tag" onclick="selectTag(id);">#tech</span>
+			<span id="business" class="tag" onclick="selectTag(id);">#business</span>
+			<span id="culture" class="tag" onclick="selectTag(id);">#culture</span>
+			<span id="showbiz" class="tag" onclick="selectTag(id);">#showbiz</span>
+		</div>
+		<div class="second-row">
+			<input type="search" id="search" name="search" onkeyup="handleSearchKey()" placeholder="search...">
+			<p id="sort">
+				<span>descend</span>
+				<input type="checkbox" id="cbx" style="display:none" onclick="return sortType(checked)">
+				<label for="cbx" class="toggle"><span></span></label>    
+				<span>ascend</span>
+			</p>
+		</div>
+	</header>
+	<main>
+		<ul id="list">
+		</ul>
+	</main>
+
+	<script type="text/javascript">
+		function selectTag(id) {
+			if (document.getElementsByClassName("active").length <= 2) {
+				let classList = document.getElementById(id).classList;
+				if(classList.contains("active")){
+					classList.remove("active");
+				} else {
+					classList.add("active");
+				}
+				tagSort();
+			} else {
+				if(document.getElementById(id).classList.contains("active")) {
+					document.getElementById(id).classList.remove("active");
+					tagSort();
+				}
+			}
+
+			if (document.getElementById("cbx").checked) {
+				document.getElementById("cbx").checked = false;
+				localStorage.setItem("sort", false);
+			}
+
+			return false;
+		}
+
+		function tagSort() {
+			var selectedTags = document.getElementsByClassName("active");
+			var tags = [];
+			for (let i = 0; i < selectedTags.length; i++) {
+				tags[i] = selectedTags[i].innerHTML;
+			}
+
+			let list = document.getElementById("list");
+			let li = list.children;
+
+			let newlist = list.cloneNode(false);
+			let matches = {
+				'0': [],
+				'1': [],
+				'2': [],
+				'3': []
+			};
+			for (let i = 0; i < li.length; i++) {
+				let spans = li[i].getElementsByTagName('span');
+				let spansText = [];
+				for (let j = 0; j < spans.length; j++) {
+					spansText.push(spans[j].innerHTML);
+				}
+
+				let counter = 0; 
+				for (let j = 0; j < tags.length; j++) {
+					if (spansText.includes(tags[j])) {
+						counter++;
+					}
+				}
+				
+				matches[counter].push(li[i]);
+			}
+
+			for (let i = 0; i < Object.keys(matches).length; i++) {
+				 htmlsort(matches[i.toString()]);
+			}
+
+			for (let i = Object.keys(matches).length - 1; i >= 0; i--) {
+				for (let j = 0; j < matches[i.toString()].length; j++) {
+					newlist.appendChild(matches[i.toString()][j]);
+				}
+			}
+
+			document.getElementById('list').parentNode.replaceChild(newlist,list);
+		}
+
+		function sort(data) {
+			data = data.sort( function(a, b) {
+			    a = new Date(a.createdAt);
+			    b = new Date(b.createdAt);
+			    return a - b;
+			});
+		}
+
+		function htmlsort(data) {
+			data = data.sort( function(a, b) {
+			    a = new Date(a.children[3].innerHTML);
+			    b = new Date(b.children[3].innerHTML);
+			    return b - a;
+			});
+		}
+
+		function handleSearchKey() {
+			var search = document.getElementById("search").value.toLowerCase();
+			let list = [...document.getElementById("list").children];
+
+			if (htmldata.length < 50) {
+		    	htmldata = list.concat(...htmldata);
+		    }
+		    console.log('big');
+		    for (let i = 0; i < listCounter; i++) {
+				console.log('dick');
+				list[i] = htmldata[i];
+		    }
+
+
+		    let newlist = list.filter(function(el){
+				return el.getElementsByTagName("h3")[0].innerHTML.toLowerCase().includes(search);
+			});
+
+			let newul = document.getElementById("list").cloneNode(false);
+			
+			for (let i = 0; i < newlist.length; i++) {
+				newul.appendChild(newlist[i]);
+			}
+
+			document.getElementById('list').parentNode.replaceChild(newul, document.getElementById("list"));
+		}
+
+		function sortType(checked) {
+			localStorage.setItem("sort", checked);
+			sortList(document.getElementById("list"));
+
+			let active = [...document.getElementsByClassName("active")];
+
+			for ( let i = 0; i < active.length; i++) {
+				active[i].classList.remove('active');
+			}
+		}
+
+		function sortList(list){
+		    var newlist = list.cloneNode(false);
+
+		    if (htmldata.length < 50) {
+		    	htmldata = [...list.children].concat(...htmldata);
+		    }
+
+		    htmldata.reverse();
+
+		    for(var i = 0; i < list.children.length; i++)
+		        newlist.appendChild(htmldata[i]);
+		    list.parentNode.replaceChild(newlist, list);
+		}
+
+
+		fetch('http://api.myjson.com/bins/152f9j').then(
+			function(response) {
+				if (response.status !== 200) {
+					console.log('Looks like there was a problem. Status Code: ' + response.status);
+					return;
+				}
+				response.json().then(function(data) {
+					data = data.data;
+					
+					sort(data);
+					if (!JSON.parse(localStorage.getItem("sort"))) {
+						data.reverse();
+					}
+
+					createList(data);
+				});
+			}
+		)
+
+		let listCounter = 0;
+		let htmldata = [];
+		function createList(data) {
+			htmldata = data.map( function(el, i) {
+				let li = document.createElement("li");
+				li.id = i;
+				let title = document.createElement("h3");
+				title.innerHTML = el.title;
+				let description = document.createElement("p");
+				description.innerHTML = el.description;
+				let img = document.createElement("img");
+				img.src = el.image;
+				let createdAt = document.createElement("p");
+				let date = new Date(el.createdAt);
+				createdAt.innerHTML = date.toGMTString();;
+				let tags = [];
+				for (let i = 0; i < el.tags.length; i++) {
+					tags[i] = document.createElement("span");
+					tags[i].innerHTML = "#" + el.tags[i].toLowerCase();
+				}
+				let remove = document.createElement("button");
+				remove.innerHTML = "x";
+				remove.onclick = function() {
+					document.getElementById("list").removeChild(this.parentNode);
+				};
+				li.appendChild(title);
+				li.appendChild(description);
+				li.appendChild(img);
+				li.appendChild(createdAt);
+				for (let i = 0; i < el.tags.length; i++) {
+					li.appendChild(tags[i]);
+				}
+				li.appendChild(remove);
+				return li;
+			})
+
+
+			for (let i = 0; i < 10; i++) {
+				let list = document.getElementById("list");
+				list.appendChild(htmldata.shift());
+			}
+			listCounter = 10;
+		}
+
+
+		window.onscroll = function(ev) {
+			if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+				for (let i = 0; i < 10; i++) {
+					let list = document.getElementById("list");
+					list.appendChild(htmldata.shift());
+				}
+				listCounter += 10;
+			}
+		};
+		window.onload = function() {
+			if(localStorage.getItem("sort") == null) {
+				localStorage.setItem("sort", document.getElementById("cbx").checked);
+			} else {
+				document.getElementById("cbx").checked = JSON.parse(localStorage.getItem("sort"));
+				
+			}
+		}
+	</script>
+</body>
+</html>
+
+
+
+<!-- 
+
+-->
+
+<!-- 
+	let tags = document.createElement("span");
+	for (let i = 0; i < el.tags.length; i++) {
+		tags.innerHTML += "#" + el.tags[i] + " ";
+	}
+-->
